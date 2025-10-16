@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gear Train Explorer – Simple, Compound, Planetary</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Gear Train Explorer</h1>
+      <div class="sub">Interactive calculators and concise theory for <strong>Simple</strong>, <strong>Compound</strong>, and <strong>Planetary</strong> gear trains.</div>
+      <nav>
+        <a href="#single">Simple Gear Train</a>
+        <a href="#compound">Compound Gear Train</a>
+        <a href="#planetary">Planetary Gear Train</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- =========================
+         SIMPLE GEAR TRAIN
+         ========================= -->
+    <section id="single" class="grid">
+      <div class="card">
+        <h2>Simple Gear Train</h2>
+        <ul class="bullets">
+            <li>
+                Overall ratio:
+                <span class="eq">i = ω<sub>in</sub>/ω<sub>out</sub> = N<sub>out</sub>/N<sub>in</sub></span>.
+            </li>
+            <li>
+                The ratio magnitude depends only on the first and last gears; idlers affect direction only, not the magnitude of the gear ratio.
+            </li>
+            <li>
+                Direction rule: Even number of gears → <em>Opposite direction to input</em> ; Odd number of gears → <em>Same direction as input</em>.
+            </li>
+        </ul>
+
+        <!-- Simple: illustration -->
+        <figure class="section-fig">
+            <img src="./Pictures/simple-gear-train.jpg" alt="Simple gear train schematic" loading="lazy">
+        </figure>
+
+        <!-- Simple: gear count control -->
+        <div class="row-3">
+          <div>
+            <label>Gear count (≥2)</label>
+            <input type="number" id="s_count" value="2" min="2" step="1">
+          </div>
+          <div></div><div></div>
+        </div>
+
+        <!-- Simple: dynamic teeth inputs container (populated by JS) -->
+        <h3>Teeth list</h3>
+        <div id="s_gear_list" class="row-3"></div>
+
+        <!-- Simple: numeric inputs (speed/torque) -->
+        <h3>Input</h3>
+        <div class="row-3" style="margin-top:10px;">
+          <div>
+            <label>Input speed (rpm) <span class="hint">ω<sub>in</sub></span></label>
+            <input type="number" id="s_in_rpm" value="1500" step="any">
+          </div>
+          <div>
+            <label>Input torque (N·m) <span class="hint">τ<sub>in</sub></span></label>
+            <input type="number" id="s_in_torque" value="2.5" step="any">
+          </div>
+          <div></div>
+        </div>
+        
+        <!-- Simple: calculated outputs -->
+        <h3>Calculated outputs</h3>
+        <div class="kpi">
+          <div class="tile"><label>Overall ratio i = ω<sub>in</sub>/ω<sub>out</sub></label><big id="s_ratio">–</big><span class="hint">&gt;1 means reduction</span></div>
+          <div class="tile"><label>Output speed (rpm)</label><big id="s_out_rpm">–</big></div>
+          <div class="tile"><label>Output torque (N·m)</label><big id="s_out_torque">–</big></div>
+          <div class="tile"><label>Output direction</label><big id="s_dir">–</big></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================
+         COMPOUND GEAR TRAIN
+         ========================= -->
+    <section id="compound" class="grid">
+      <div class="card">
+        <h2>Compound Gear Train</h2>
+        <p>
+          One compound pair on a common shaft: stage&nbsp;1 meshes
+          <span class="eq">Gear A → Gear D</span>, and stage&nbsp;2 meshes
+          <span class="eq">Gear B → Gear C</span> with
+          <span class="eq">Gear D ≡ Gear B</span> (same shaft).
+          Overall ratio is the product of the two stages:
+          <span class="eq">i = ω<sub>in</sub>/ω<sub>out</sub> = (N<sub>D</sub>/N<sub>A</sub>) · (N<sub>C</sub>/N<sub>B</sub>)</span>.
+        </p>
+
+        <!-- Compound: design checklist -->
+        <div class="compound-conditions">
+          <h3>Design steps</h3>
+          <ul class="bullets">
+            <li>
+              <strong>Step 1 — Pick stages:</strong>
+              factor the target ratio <span class="eq">i</span> into small per-stage ratios
+              (<span class="eq">|i_k| &lt; 10</span>). Example:
+              <span class="eq">180 = 5 × 6 × 6</span> → 3 stages.
+            </li>
+            <li>
+              <strong>Step 2 — Set teeth:</strong>
+              choose a pinion count (e.g., <span class="eq">N<sub>pin</sub>=14</span>) for each stage, then
+              <span class="eq">N<sub>gear</sub> ≈ i_k · N<sub>pin</sub></span> (round to integer).
+              Use the same module/PA within each mesh.
+            </li>
+            <li>
+              <strong>Step 3 — Chain stages:</strong>
+              mount the driven gear of stage <em>k</em> on the same shaft as the pinion of stage <em>k+1</em>;
+              overall <span class="eq">i = ∏(N<sub>gear</sub>/N<sub>pin</sub>)</span>. Each external mesh flips direction.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Compound: illustration -->
+        <figure class="section-fig">
+          <img src="./Pictures/compound-gear-train.jpg" alt="Compound gear train schematic" loading="lazy">
+        </figure>
+
+        <div class="row">
+          <!-- Compound: teeth inputs -->
+          <div class="full">
+            <h3>Teeth</h3>
+            <div class="row-3">
+              <div><label>N<sub>A</sub> (stage&nbsp;1 driver)</label><input type="number" id="c_Z1" value="18" min="1" step="1"></div>
+              <div><label>N<sub>D</sub> (stage&nbsp;1 driven & same shaft)</label><input type="number" id="c_Z2" value="54" min="1" step="1"></div>
+              <div><label>N<sub>B</sub> (stage&nbsp;2 driver & same shaft)</label><input type="number" id="c_Z3" value="20" min="1" step="1"></div>
+            </div>
+            <div class="row-3" style="margin-top:10px;">
+              <div><label>N<sub>C</sub> (stage&nbsp;2 driven)</label><input type="number" id="c_Z4" value="80" min="1" step="1"></div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- Compound: numeric inputs (speed/torque) -->
+          <div class="full">
+            <h3>Input</h3>
+            <div class="row-3">
+              <div><label>Input speed (rpm) ω<sub>in</sub></label><input type="number" id="c_in_rpm" value="1500" step="any"></div>
+              <div><label>Input torque (N·m) τ<sub>in</sub></label><input type="number" id="c_in_torque" value="2.5" step="any"></div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compound: calculated outputs -->
+        <h3>Calculated outputs</h3>
+        <div class="kpi">
+          <div class="tile"><label>Overall ratio i = ω<sub>in</sub>/ω<sub>out</sub></label><big id="c_ratio">–</big></div>
+          <div class="tile"><label>Output speed (rpm)</label><big id="c_out_rpm">–</big></div>
+          <div class="tile"><label>Output torque (N·m)</label><big id="c_out_torque">–</big></div>
+          <div class="tile"><label>Output direction</label><big id="c_dir">–</big></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================
+         PLANETARY GEAR TRAIN
+         ========================= -->
+    <section id="planetary" class="grid">
+      <div class="card">
+        <h2>Planetary Gear Train</h2>
+
+        <!-- Planetary: theory (Willis relation and carrier speed) -->
+        <p>
+          In the planetary gear train shown (green <em>Ring</em>, red <em>Sun</em>, blue <em>Planets</em>, gray <em>Arm/Carrier</em>),
+          the Willis kinematic relation is
+          <span class="eq">(ω<sub>R</sub> − ω<sub>C</sub>) / (ω<sub>S</sub> − ω<sub>C</sub>) = − N<sub>S</sub> / N<sub>R</sub></span>.
+          Equivalently, the carrier speed is
+          <span class="eq">ω<sub>C</sub> = (N<sub>S</sub>·ω<sub>S</sub> + N<sub>R</sub>·ω<sub>R</sub>) / (N<sub>S</sub> + N<sub>R</sub>)</span>.
+        </p>
+
+        <!-- Planetary: design conditions (tooth counts & planet count) -->
+        <div class="planetary-conditions">
+          <h3>Design conditions</h3>
+          <ul class="bullets">
+            <li>
+              <strong>Sizing (internal ring)</strong>:
+              <span class="eq">N<sub>R</sub> = N<sub>S</sub> + 2·N<sub>P</sub></span>
+              <span class="hint">Ring tooth count = Sun + 2×Planet.</span>
+            </li>
+            <li>
+              <strong>Defining the number of planets</strong>:
+              for <em>n</em> equally-spaced planets, require
+              <span class="eq">(N<sub>S</sub> + N<sub>R</sub>)/n = integer</span>.
+              <span class="hint">Ensures planets repeat mesh in-phase around the ring.</span>
+            </li>
+            <li>
+              <strong>Planet–planet clearance</strong>:
+              avoid interference between adjacent planets by (approx.)
+              <span class="eq">N<sub>P</sub> + 2 ≤ (N<sub>S</sub> + N<sub>P</sub>) · sin(π/n)</span>.
+              <span class="hint">If violated, increase <em>n</em> or adjust tooth counts.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Planetary: three canonical configurations quick reference -->
+        <h3>Planetary configurations (3 types)</h3>
+        <div class="planetary-panels">
+          <!-- Planetary type: ωR = 0 -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="title">Planetary type</div>
+              <div class="omega">ω<sub>R</sub> = 0</div>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Sun (ω<sub>S</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Carrier (ω<sub>C</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>S</sub>/ω<sub>C</sub> = 1 + N<sub>R</sub>/N<sub>S</sub></span>
+              </p>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Carrier (ω<sub>C</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Sun (ω<sub>S</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>C</sub>/ω<sub>S</sub> = N<sub>S</sub>/(N<sub>S</sub>+N<sub>R</sub>)</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Star type: ωC = 0 -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="title">Star type</div>
+              <div class="omega">ω<sub>C</sub> = 0</div>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Ring (ω<sub>R</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Sun (ω<sub>S</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>R</sub>/ω<sub>S</sub> = − N<sub>S</sub>/N<sub>R</sub></span>
+              </p>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Sun (ω<sub>S</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Ring (ω<sub>R</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>S</sub>/ω<sub>R</sub> = − N<sub>R</sub>/N<sub>S</sub></span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Solar type: ωS = 0 -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="title">Solar type</div>
+              <div class="omega">ω<sub>S</sub> = 0</div>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Ring (ω<sub>R</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Carrier (ω<sub>C</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>R</sub>/ω<sub>C</sub> = 1 + N<sub>S</sub>/N<sub>R</sub></span>
+              </p>
+            </div>
+
+            <div class="subcase">
+              <p><span class="badge danger"><strong>Input</strong></span> Carrier (ω<sub>C</sub>) &nbsp; <span class="badge danger"><strong>Output</strong></span> Ring (ω<sub>R</sub>)</p>
+              <p>i = ω<sub>in</sub>/ω<sub>out</sub> =
+                <span class="eq">ω<sub>C</sub>/ω<sub>R</sub> = N<sub>R</sub>/(N<sub>R</sub>+N<sub>S</sub>)</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Planetary: illustration -->
+        <figure class="section-fig">
+            <img src="./Pictures/planetary-gear-train.jpg" alt="Simple planetary gear set" loading="lazy">
+        </figure>
+
+        <div class="row">
+          <!-- Planetary: teeth inputs -->
+          <div class="full">
+            <h3>Teeth</h3>
+            <div class="row-3">
+              <div><label>Sun teeth N<sub>S</sub></label><input type="number" id="p_Zs" value="20" min="5"></div>
+              <div><label>Ring teeth N<sub>R</sub></label><input type="number" id="p_Zr" value="60" min="10"></div>
+              <div><label>Planets (count) n</label><input type="number" id="p_np" value="3" min="1"></div>
+            </div>
+            <p class="hint">Input: use N<sub>R</sub> &gt; N<sub>S</sub>; typically N<sub>R</sub>=N<sub>S</sub>+2·N<sub>P</sub>. Pick planet count n so (N<sub>R</sub>+N<sub>S</sub>)/n is integer.</p>
+          </div>
+
+          <!-- Planetary: preset modes and numeric inputs -->
+          <div class="full">
+            <h3>Preset modes</h3>
+            <div class="row-3">
+              <div>
+                <label>Mode</label>
+                <select id="p_mode">
+                  <option value="sun_in_ring_fixed_carrier_out" selected>Sun in, Ring fixed, Carrier out (reduction)</option>
+                  <option value="carrier_in_ring_fixed_sun_out">Carrier in, Ring fixed, Sun out (increase)</option>
+                  <option value="ring_in_sun_fixed_carrier_out">Ring in, Sun fixed, Carrier out (reduction)</option>
+                  <option value="carrier_in_sun_fixed_ring_out">Carrier in, Sun fixed, Ring out (increase)</option>
+                  <option value="sun_in_carrier_fixed_ring_out">Sun in, Carrier fixed, Ring out (increase, reversed)</option>
+                  <option value="ring_in_carrier_fixed_sun_out">Ring in, Carrier fixed, Sun out (increase, reversed)</option>
+                </select>
+              </div>
+              <div><label>Input speed (rpm) ω<sub>in</sub></label><input type="number" id="p_in_rpm" value="1500" step="any"></div>
+              <div><label>Input torque (N·m) τ<sub>in</sub></label><input type="number" id="p_in_torque" value="2.5" step="any"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Planetary: calculated outputs -->
+        <h3>Calculated outputs</h3>
+        <div class="kpi">
+          <div class="tile"><label>Overall ratio i = ω<sub>in</sub>/ω<sub>out</sub></label><big id="p_ratio">–</big></div>
+          <div class="tile"><label>Output speed (rpm)</label><big id="p_out_rpm">–</big></div>
+          <div class="tile"><label>Output torque (N·m)</label><big id="p_out_torque">–</big></div>
+          <div class="tile"><label>Output direction</label><big id="p_dir">–</big></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
